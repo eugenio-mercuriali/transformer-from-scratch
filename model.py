@@ -56,6 +56,27 @@ class PositionalEncoding(nn.Module):
         # Apply the dropout to reduce overfitting
         return self.dropout(x)
 
+    # Add and norm - layer normalization
+    # Gamma (alpha, multiplicative) and Beta(bias, additive) are parameters that we apply to each item
+    # on top of the layer normalization and that the model can also learn, so the model can have the
+    # possibility to amplify these values when he needs to
+    class LayerNormalization(nn.Module):
+        # We need epsilon since our CPU or GPU can only represent numbers up to a certain position
+        # and also to avoid division by 0
+        def __init__(self, eps: float = 10**-6) -> None:
+            super().__init__()
+            self.eps = eps
+            # nn.Parameter to make them learnable
+            self.alpha = nn.Parameter(torch.ones(1))  # multiplicative
+            self.bias = nn.Parameter(torch.zeros(1))  # additive
+
+        def forward(self, x):
+            mean = x.mean(dim=-1, keepdim=True)
+            std = x.std(dim=-1, keepdim=True)
+
+            return self.alpha * (x - mean) / (std + self.eps) + self.bias
+
+
 
 
 
