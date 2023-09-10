@@ -167,9 +167,3 @@ class ResidualConnection(nn.Module):
         # We take x, then we combine it with the output of the next layer
         # which is called sublayer in this case, then we apply the dropout
         return x + self.dropout(sublayer(self.norm(x)))
-
-
-
-
-
-
