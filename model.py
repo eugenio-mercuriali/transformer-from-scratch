@@ -41,7 +41,6 @@ class PositionalEncoding(nn.Module):
         # Add batch dimension - now the shape is (seq_len, d_model)
         # We will instead have a batch of sentences
         pe = pe.unsqueeze(0)  # (1, seq_len, d_model)
-
         # When we have a tensor that we want to keep inside the model not as a learned parameter
         # that will be saved when we save the file of the model, we should register it as a buffer
         # In this way the tensor will be saved in the file along with the state of the model
