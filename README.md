@@ -1,2 +1,2 @@
-# transformer_from_scratch
+# transformer-from-scratch
 Building a Transformer from scratch using PyTorch
