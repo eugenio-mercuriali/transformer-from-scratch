@@ -211,3 +211,30 @@ class Encoder(nn.Module):
             # The output for the previous layer becomes the input for the next layer
             x = layer(x, mask)
         return self.norm(x)
+
+
+class DecoderBlock(nn.Module):
+
+    def __init__(
+            self,
+            self_attention_block: MultiHeadAttentionBlock,
+            cross_attention_block: MultiHeadAttentionBlock,
+            feedforward_block: FeedForwardBlock,
+            dropout: float
+    ) -> None:
+        super().__init__()
+        self.self_attention_block = self_attention_block
+        self.cross_attention_block = cross_attention_block
+        self.feedforward_block = feedforward_block
+        self.residual_connections = nn.Module(ResidualConnection(dropout) for _ in range(3))
+
+    # Since we are dealing with a translation task, so we have a source and target language
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, tgt_mask))
+        x = self.residual_connections[1](x, lambda x: self.self_attention_block(
+            x, encoder_output, encoder_output, src_mask))
+        x = self.residual_connections[2](x, self.feedforward_block)
+
+        return x
+
+
