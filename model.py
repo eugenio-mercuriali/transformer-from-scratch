@@ -251,5 +251,21 @@ class DecoderBlock(nn.Module):
             return self.norm(x)
 
 
+# Projecting the embedding into the vocabulary
+class ProjectionLayer(nn.Module):
+    def __init__(self, d_model: int, vocab_size: int):
+        super().__init__()
+        self.proj = nn.Linear(d_model, vocab_size)
+        self.d_model = d_model
+        self.vocab_size = vocab_size
+
+    def forward(self, x):
+        # (batch, seq_len, d_model) -> (batch, seq_len, vocab_size)
+        # We apply the log-softmax for numerical stability
+        return torch.log_softmax(self.proj(x), dim=-1)
+
+
+
+
 
 
