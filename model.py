@@ -14,7 +14,7 @@ class InputEmbeddings(nn.Module):
 
     def forward(self, x):
         # In the original paper the authors multiply the embeddings
-        # by the root of the size of the model
+        # by the root of the size of the model size
         return self.embedding(x) * math.sqrt(self.d_model)
 
 
@@ -49,7 +49,8 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         # We need to add the positional encoding to every word inside the sentence
-        # We tell the model that we don't want to learn the positional encoding with requires_grad(False)
+        # We tell the model that we don't want to learn the positional encoding
+        # with requires_grad(False)
         # Since the values will always be the same
         x = x + (self.pe[:, x.shape[1], :]).requires_grad(False)
         # Apply the dropout to reduce overfitting
@@ -167,3 +168,37 @@ class ResidualConnection(nn.Module):
         # We take x, then we combine it with the output of the next layer
         # which is called sublayer in this case, then we apply the dropout
         return x + self.dropout(sublayer(self.norm(x)))
+
+
+class EncoderBlock(nn.Module):
+
+    def __init__(
+            self,
+            self_attention_block: MultiHeadAttentionBlock,
+            feed_forward_block: FeedForwardBlock,
+            dropout: float
+    ) -> None:
+        super().__init__()
+        self.self_attention_block = self_attention_block
+        self.feed_forward_block = feed_forward_block
+        self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
+
+    # We need a mask for the input of the encoder because we want to hide the interaction of
+    # the padding words with the other words
+    def forward(self, x, src_mask):
+
+        # First apply the self attention (hence why query, key and value will be equal to x)
+        x = self.residual_connections[0](x, lambda x: self.self_attention_block(x, x, x, src_mask))
+
+        # Feed-forward
+        x = self.residual_connections[1](x, self.feed_forward_block)
+
+        return x
+
+
+# In one encoder we can have multiple encoder blocks
+class Encoder(nn.Module):
+
+    def __init__(self, layers: nn.ModuleList) -> None:
+        super().__init__()
+        self.layers = layers
