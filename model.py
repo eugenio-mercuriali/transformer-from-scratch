@@ -202,3 +202,12 @@ class Encoder(nn.Module):
     def __init__(self, layers: nn.ModuleList) -> None:
         super().__init__()
         self.layers = layers
+        self.norm = LayerNormalization()
+
+    def forward(self, x, mask):
+        # We apply one layer after another
+
+        for layer in self.layers:
+            # The output for the previous layer becomes the input for the next layer
+            x = layer(x, mask)
+        return self.norm(x)
