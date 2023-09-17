@@ -237,18 +237,19 @@ class DecoderBlock(nn.Module):
 
         return x
 
-    class Decoder(nn.Module):
 
-        def __init__(self, layers: nn.ModuleList) -> None:
-            super().__init__()
-            self.layers = layers
-            self.norm = LayerNormalization()
+class Decoder(nn.Module):
 
-        def forward(self, x, encoder_output, src_mask, tgt_mask):
+    def __init__(self, layers: nn.ModuleList) -> None:
+        super().__init__()
+        self.layers = layers
+        self.norm = LayerNormalization()
 
-            for layer in self.layers:
-                x = layer(x, encoder_output, src_mask, tgt_mask)
-            return self.norm(x)
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
+
+        for layer in self.layers:
+            x = layer(x, encoder_output, src_mask, tgt_mask)
+        return self.norm(x)
 
 
 # Projecting the embedding into the vocabulary
@@ -285,6 +286,32 @@ class TransformerBlock(nn.Module):
         self.src_pos = src_pos
         self.tgt_pos = tgt_pos
         self.projection_layer = projection_layer
+
+    # We define 3 methods: one to encode, one to decode and one to project
+    # We don't just define a forward method since we can reuse the output of the encoder
+    # during inference
+
+    # In the encoder we have the source language and the source mask
+    def encode(self, src, src_mask):
+        # Apply the embedding
+        src = self.src_embed(src)
+        # Apply the positional encoding
+        src = self.src_pos(src)
+        # Encode
+        return self.encoder(src, src_mask)
+
+    def decode(self, encoder_output, src_mask, tgt, tgt_mask):
+        # Apply the target embedding to the target sentence
+        tgt = self.tgt_embed(tgt)
+        # Apply the positional encoding
+        tgt = self.tgt_pos(tgt)
+        # Decode (this is basically the forward method of the decoder)
+        return self.decoder(tgt, encoder_output, src_mask, tgt_mask)
+
+    def project(self, x):
+        return self.projection_layer(x)
+
+
 
 
 
