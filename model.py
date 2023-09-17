@@ -226,7 +226,7 @@ class DecoderBlock(nn.Module):
         self.self_attention_block = self_attention_block
         self.cross_attention_block = cross_attention_block
         self.feedforward_block = feedforward_block
-        self.residual_connections = nn.Module(ResidualConnection(dropout) for _ in range(3))
+        self.residual_connections = nn.ModuleList(ResidualConnection(dropout) for _ in range(3))
 
     # Since we are dealing with a translation task, so we have a source and target language
     def forward(self, x, encoder_output, src_mask, tgt_mask):
