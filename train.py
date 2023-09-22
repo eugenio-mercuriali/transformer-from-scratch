@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
 
+from dataset import BilingualDataset, causal_mask
+from model import build_transformer
+
 from datasets import load_dataset
 from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
@@ -49,3 +52,46 @@ def get_ds(config):
 
     # Creating the dataset that the model will use to access the tensors directly
     # Now we just created the tokenizer and loaded the data -> dataset.py
+
+    train_ds = BilingualDataset(
+        train_ds_raw,
+        tokenizers_src,
+        tokenizers_tgt,
+        config['lang_src'],
+        config['lang_tgt'],
+        config['seq_len']
+    )
+
+    val_ds = BilingualDataset(
+        val_ds_raw,
+        tokenizers_src,
+        tokenizers_tgt,
+        config['lang_src'],
+        config['lang_tgt'],
+        config['seq_len']
+    )
+
+    max_len_src = 0
+    max_len_tgt = 0
+
+    for item in ds_raw:
+        src_ids = tokenizers_src.encode(item['translation'][config['lang_src']]).ids
+        tgt_ids = tokenizers_src.encode(item['translation'][config['lang_tgt']]).ids
+        max_len_src = max(max_len_src, len(src_ids))
+        max_len_tgt = max(max_len_tgt, len(tgt_ids))
+
+    print(f'Max length of source sentence: {max_len_src}')
+    print(f'Max length of target sentence: {max_len_tgt}')
+
+    train_dataloader = DataLoader(train_ds, batch_size=config['batch_size'], shuffle=True)
+    # For the validation, we want to process each sentence one by one
+    val_dataloader = DataLoader(val_ds, batch_size=1, shuffle=True)
+
+    return train_dataloader, val_dataloader, tokenizers_src, tokenizers_tgt
+
+
+def get_model(config, vocab_src_len, vocab_tgt_len):
+    model = build_transformer(vocab_src_len, vocab_tgt_len, config['seq_len'], config['tgt_len'], config['d_model'])
+    return model
+
+
