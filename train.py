@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader, random_split
 
 from datasets import load_dataset
 from tokenizers import Tokenizer
@@ -40,3 +41,11 @@ def get_ds(config):
     # Build tokenizers
     tokenizers_src = get_or_build_tokenizer(config, ds_raw, config['lang_src'])
     tokenizers_tgt = get_or_build_tokenizer(config, ds_raw, config['lang_tgt'])
+
+    # Keep 90% for training and 10% for validation
+    train_ds_size = int(0.9 * len(ds_raw))
+    val_ds_size = len(ds_raw) - train_ds_size
+    train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
+
+    # Creating the dataset that the model will use to access the tensors directly
+    # Now we just created the tokenizer and loaded the data -> dataset.py
