@@ -10,6 +10,7 @@ class BilingualDataset(Dataset):
         super().__init__()
 
         self.ds = ds
+        self.seq_len = seq_len
         self.tokenizer_src = tokenizer_src
         self.tokenizer_tgt = tokenizer_tgt
         self.src_lang = src_lang
