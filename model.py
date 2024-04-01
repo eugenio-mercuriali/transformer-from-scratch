@@ -10,6 +10,9 @@ class InputEmbeddings(nn.Module):
         super().__init__()
         self.d_model = d_model
         self.vocab_size = vocab_size
+        # Input is a matrix of size (seq_len, vocab_size),
+        # since we one-hot encode each word
+        # (seq_len, vocab_size) x (vocab_size, d_model) -> (vocab_size, d_model)
         self.embedding = nn.Embedding(vocab_size, d_model)
 
     def forward(self, x):

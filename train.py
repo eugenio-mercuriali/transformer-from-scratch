@@ -290,7 +290,7 @@ def train_model(config):
         )
 
 
-if '__name__' == '__main__':
+if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     config = get_config()
     train_model(config)
