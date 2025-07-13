@@ -87,7 +87,7 @@ class FeedForwardBlock(nn.Module):
         super().__init__()
         self.linear_1 = nn.Linear(d_model, d_ff)  # W1 and B1
         self.dropout = nn.Dropout(dropout)
-        self.linear_2 = nn.Linear(d_model, d_ff)  # W2 and B2
+        self.linear_2 = nn.Linear(d_ff, d_model)  # W2 and B2
 
     def forward(self, x):
         # Input sentence
