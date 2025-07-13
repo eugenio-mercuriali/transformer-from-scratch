@@ -133,7 +133,7 @@ class MultiHeadAttentionBlock(nn.Module):
         # We return the attention scores for visualisation purposes
         return (attention_scores @ value), attention_scores
 
-    def forward(self, x, q, k, v, mask):
+    def forward(self, q, k, v, mask):
         query = self.w_q(q)  # shape: (batch, seq_len, d_model) --> (batch, seq_len, d_model)
         key = self.w_k(k)  # shape: (batch, seq_len, d_model) --> (batch, seq_len, d_model)
         value = self.w_v(v)  # shape: (batch, seq_len, d_model) --> (batch, seq_len, d_model)
