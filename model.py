@@ -381,14 +381,3 @@ def build_transformer(
                 nn.init.xavier_uniform_(p)
 
         return transformer
-
-
-
-
-
-
-
-
-
-
-
